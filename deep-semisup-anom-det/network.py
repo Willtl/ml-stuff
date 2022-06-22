@@ -1,6 +1,8 @@
 import torch
 from torch import nn
 
+import utils
+
 
 # Simple MLP, decoder is used for pre-training
 class MLP(nn.Module):
@@ -20,7 +22,6 @@ class MLP(nn.Module):
         ).to(self.device)
 
         self.decoder = nn.Sequential(
-            nn.Flatten(),
             nn.Linear(rep_dim, num_features // 2, bias=bias),
             nn.ReLU(),
             nn.Linear(num_features // 2, num_features, bias=bias),
