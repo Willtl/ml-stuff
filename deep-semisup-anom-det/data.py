@@ -64,15 +64,13 @@ def get_loaders(dataset='gaussian'):
         train_ds = CustomDataset(train_samples, train_targets)
         test_ds = CustomDataset(test_samples, test_targets)
     else:
-        train_samples, train_targets, test_samples, test_targets = load_data(dataset, ratio_normal=1.0,
-                                                                             ratio_anomaly=0.0,
-                                                                             polution=0.0)
+        samples, targets, test_samples, test_targets = load_data(dataset, ratio_normal=0.01, ratio_anomaly=0.0)
 
-        train_ds = CustomDataset(train_samples, train_targets)
+        train_ds = CustomDataset(samples, targets)
         test_ds = CustomDataset(test_samples, test_targets)
 
-        if True:
-            utils.plot(train_samples, train_targets, 'train_samples', dataset)
+        if False:
+            utils.plot(samples, targets, 'train_samples', dataset)
             utils.plot(test_samples, test_targets, 'test_samples', dataset)
 
     train_loader = DataLoader(dataset=train_ds, batch_size=64, shuffle=True, drop_last=True, pin_memory=True,
@@ -87,41 +85,55 @@ def get_pretrain(dataset='gaussian'):
         samples, targets = gen_gaussian(n_samples=10000, ratio_normal=1.0)
         train_ds = CustomDataset(samples, targets)
     else:
-        train_samples, train_targets, _, _ = load_data(dataset, ratio_normal=1.0, ratio_anomaly=0.0, polution=0.0)
+        train_samples, train_targets, _, _ = load_data(dataset, ratio_normal=0.5, ratio_anomaly=0.0)
         train_ds = CustomDataset(train_samples, train_targets)
 
     pretrain_loader = DataLoader(dataset=train_ds, batch_size=64, shuffle=True, drop_last=True, pin_memory=True)
     return pretrain_loader
 
 
-def load_data(dataset_name, test_size=0.33, ratio_normal=1.0, ratio_anomaly=1.0, polution=0.0):
+def load_data(dataset_name, test_size=0.33, ratio_normal=0.5, ratio_anomaly=1.0, pollution=0.0):
+    """ Load data from json
+
+    Attributes:
+        dataset_name    name of the dataset in folder datasets
+        test_size       ratio of samples for testing
+        ratio_normal    ratio of the unlabeled data that is labeled as normal
+        ratio_anomaly   ratio of the normal data that is labeled as anomaly
+        pollution        not implemented
+    """
+
     with open(f'datasets/{dataset_name}.json') as json_file:
         data = json.load(json_file)
         normal = np.array(data['normal']).astype(np.float32)
         anomaly = np.array(data['anomaly']).astype(np.float32)
 
-        norm_train, norm_test = train_test_split(normal, test_size=test_size, random_state=42)
+        normal, norm_test = train_test_split(normal, test_size=test_size, random_state=42)
+        norm_train, unlabeled = train_test_split(normal, test_size=1 - ratio_normal, random_state=42)
         anom_train, anom_test = train_test_split(anomaly, test_size=test_size, random_state=42)
 
-        # Filter normals
-        indices = np.random.choice(norm_train.shape[0], size=int(norm_train.shape[0] * ratio_normal), replace=False)
-        norm_train = norm_train[indices]
+        # Set amount of anomalies given ratio
+        amount_anom = int(norm_train.shape[0] * ratio_anomaly)
+        assert amount_anom < anomaly.shape[0], 'anomaly ratio error'
+        indexes = np.random.choice(anom_train.shape[0], size=amount_anom, replace=False)
+        anom_train = anom_train[indexes]
+
+        # Define targets for unlabeled, normal, and anomaly
+        unlabeled_train_targets = np.zeros(unlabeled.shape[0]).astype(np.int)
         norm_train_targets = np.ones(norm_train.shape[0]).astype(np.int)
-
-        # Filter anomalies
-        indices = np.random.choice(anom_train.shape[0], size=int(anom_train.shape[0] * ratio_anomaly), replace=False)
-        anom_train = anom_train[indices]
-        anom_train_targets = np.ones(anom_train.shape[0]).astype(np.int) * -1
-
-        train_samples = np.concatenate((norm_train, anom_train))
-        train_targets = np.concatenate((norm_train_targets, anom_train_targets))
-
-        test_samples = np.concatenate((norm_test, anom_test))
         norm_test_targets = np.ones(norm_test.shape[0]).astype(np.int)
+        anom_train_targets = np.ones(anom_train.shape[0]).astype(np.int) * -1
         anom_test_targets = np.ones(anom_test.shape[0]).astype(np.int) * -1
+
+        # Concatenate data
+        train_samples = np.concatenate((unlabeled, norm_train, anom_train))
+        train_targets = np.concatenate((unlabeled_train_targets, norm_train_targets, anom_train_targets))
+        test_samples = np.concatenate((norm_test, anom_test))
         test_targets = np.concatenate((norm_test_targets, anom_test_targets))
 
-        print(f'Training: {norm_train.shape[0]} normal, and {anom_train.shape[0]} anomaly samples')
-        print(f'Testing: {norm_test.shape[0]} normal, and {anom_test.shape[0]} anomaly samples')
+        print(f'Training: {unlabeled.shape[0]} unlabeled, {norm_train.shape[0]} normal, '
+              f'and {anom_train.shape[0]} anomaly samples')
+        print(f'Testing:  {norm_test.shape[0]} normal,'
+              f' and {anom_test.shape[0]} anomaly samples')
 
         return train_samples, train_targets, test_samples, test_targets

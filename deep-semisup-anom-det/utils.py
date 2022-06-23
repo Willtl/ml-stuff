@@ -160,13 +160,30 @@ def scores_landscape(net, train_samples, c, min_input=-10, max_input=10, size=51
 
 
 def plot(samples, targets, file, dataset):
+    n_unlab, n_norm, n_anom = 0, 0, 0
+    for i in range(targets.shape[0]):
+        if targets[i] == -1:
+            n_anom += 1
+        elif targets[i] == 0:
+            n_unlab += 1
+        else:
+            n_norm += 1
+
     cdict = {-1: 'red', 0: 'grey', 1: 'blue'}
     fig, ax = plt.subplots(figsize=(8, 6), dpi=300)
+    ax.set_title(f"# unlabeled: {n_unlab}, # normal: {n_norm}, # anomaly: {n_anom}")
+
     for g in np.unique(targets):
-        label = 'Normal' if g == 1 else 'Anomaly'
+        if g == -1:
+            label = 'Anomaly'
+        elif g == 0:
+            label = 'Unlabeled'
+        else:
+            label = "Normal"
+
         ix = np.where(targets == g)
         ax.scatter(samples[ix, 0], samples[ix, 1], c=cdict[g], label=label, s=30, linewidth=0.4)
-    ax.legend(loc='lower center', ncol=2, bbox_to_anchor=(0.5, -0.15))
+    ax.legend(loc='lower center', ncol=3, bbox_to_anchor=(0.5, -0.15))
     plt.xlim([-10, 10])
     plt.ylim([-10, 10])
     plt.tight_layout()

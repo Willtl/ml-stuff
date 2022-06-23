@@ -46,9 +46,6 @@ def train(net, loader, c, epochs=1, eta=1.0, eps=1e-9):
 
     net.train()
     for epoch in range(epochs):
-        if epoch in milestones:
-            print()
-
         epoch_loss = 0.0
         n_batches = 0
         epoch_start_time = time.time()
@@ -64,9 +61,13 @@ def train(net, loader, c, epochs=1, eta=1.0, eps=1e-9):
             loss.backward()
             opt.step()
 
-            scheduler.step()
             epoch_loss += loss.item()
             n_batches += 1
+
+            scheduler.step()
+
+        if epoch in milestones:
+            print(f'Adjusted learning rate: {float(scheduler.get_last_lr()[0]):3}')
 
         # log epoch statistics
         epoch_train_time = time.time() - epoch_start_time
