@@ -38,7 +38,7 @@ def pretrain(net, loader, epochs=1):
     return c
 
 
-def train(net, loader, c, epochs=1, eta=1.0, eps=1e-9):
+def train(net, loader, c, epochs=1, eta=2.0, eps=1e-9):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     opt = optim.Adam(net.parameters(), lr=0.001, weight_decay=1e-6)
     milestones = [int(epochs * 0.75), int(epochs * 0.9)]

@@ -225,5 +225,5 @@ def scores_contour(net, c, test_samples, test_targets, auroc, dataset, add_point
         ax.legend(loc='lower center', ncol=2, bbox_to_anchor=(0.5, -0.15))
 
     plt.tight_layout()
-    plt.savefig(f'results/{dataset}/scores_contour_unsup', dpi=300)
+    plt.savefig(f'results/{dataset}/scores_contour', dpi=300)
     # plt.show()
