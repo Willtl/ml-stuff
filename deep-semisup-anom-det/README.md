@@ -1,6 +1,7 @@
 # Deep semi-supervised anomaly detection
 
 Simple Pytorch implementation of Deep SAD with some improvements.  
+Data generated with https://github.com/Willtl/ml-stuff/tree/main/mouse-data-gen
   
 Dataset  |                            Unsupervised                             |  Semi-Supervised (1% of labeled anomalies)                    
 :----:|:-------------------------------------------------------------------:|:----:
