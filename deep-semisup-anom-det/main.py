@@ -102,9 +102,9 @@ def test(net, loader, c):
 
 
 def main():
-    epochs_pre, epochs_tra = 15, 200
+    epochs_pre, epochs_tra = 15, 400
 
-    for i in range(0, 7):
+    for i in range(0, 8):
         dataset = f'dataset{i + 1}'
 
         # Simple MLP with a symmetric decoder for pretraining

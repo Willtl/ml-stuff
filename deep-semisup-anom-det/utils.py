@@ -161,7 +161,7 @@ def scores_landscape(net, train_samples, c, min_input=-10, max_input=10, size=51
 
 def plot(samples, targets, file, dataset):
     cdict = {-1: 'red', 0: 'grey', 1: 'blue'}
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(8, 6), dpi=300)
     for g in np.unique(targets):
         label = 'Normal' if g == 1 else 'Anomaly'
         ix = np.where(targets == g)
@@ -174,7 +174,7 @@ def plot(samples, targets, file, dataset):
     # plt.show()
 
 
-def scores_contour(net, c, test_samples, test_targets, auroc, dataset):
+def scores_contour(net, c, test_samples, test_targets, auroc, dataset, add_points=False):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     x = np.linspace(-10, 10, 100)
@@ -191,20 +191,22 @@ def scores_contour(net, c, test_samples, test_targets, auroc, dataset):
                 dist = torch.sum((output - c) ** 2)
                 zs[i][j] = dist.to('cpu').numpy().item()
 
-    fig, ax = plt.subplots(1, 1)
+    fig, ax = plt.subplots(1, 1, figsize=(8, 6), dpi=300)
     ax.set_title(f"Score's Contours Plot - AUROC: {auroc:.5f}")
 
     cp = ax.contourf(x, y, np.transpose(zs), 1000)
     cbar = fig.colorbar(cp)
     cbar.set_label('Score', rotation=270, labelpad=15)
-
     ax.autoscale(False)
-    cdict = {-1: 'red', 0: 'grey', 1: 'blue'}
-    for g in np.unique(test_targets):
-        label = 'Normal' if g == 1 else 'Anomaly'
-        ix = np.where(test_targets == g)
-        ax.scatter(test_samples[ix, 0], test_samples[ix, 1], c=cdict[g], label=label, s=30, linewidth=0.4)
-    ax.legend(loc='lower center', ncol=2, bbox_to_anchor=(0.5, -0.15))
+
+    if add_points:
+        cdict = {-1: 'red', 0: 'grey', 1: 'blue'}
+        for g in np.unique(test_targets):
+            label = 'Normal' if g == 1 else 'Anomaly'
+            ix = np.where(test_targets == g)
+            ax.scatter(test_samples[ix, 0], test_samples[ix, 1], c=cdict[g], label=label, s=30, linewidth=0.4)
+        ax.legend(loc='lower center', ncol=2, bbox_to_anchor=(0.5, -0.15))
+
     plt.tight_layout()
-    plt.savefig(f'results/{dataset}/scores_contour', dpi=300)
+    plt.savefig(f'results/{dataset}/scores_contour_unsup', dpi=300)
     # plt.show()

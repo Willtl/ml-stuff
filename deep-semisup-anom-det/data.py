@@ -65,7 +65,7 @@ def get_loaders(dataset='gaussian'):
         test_ds = CustomDataset(test_samples, test_targets)
     else:
         train_samples, train_targets, test_samples, test_targets = load_data(dataset, ratio_normal=1.0,
-                                                                             ratio_anomaly=0.05,
+                                                                             ratio_anomaly=0.0,
                                                                              polution=0.0)
 
         train_ds = CustomDataset(train_samples, train_targets)
