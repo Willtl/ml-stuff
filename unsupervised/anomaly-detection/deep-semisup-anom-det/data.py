@@ -64,14 +64,14 @@ def get_loaders(dataset='gaussian'):
         train_ds = CustomDataset(train_samples, train_targets)
         test_ds = CustomDataset(test_samples, test_targets)
     else:
-        samples, targets, test_samples, test_targets = load_data(dataset, ratio_normal=0.2, ratio_anomaly=0.4)
+        samples, targets, test_samples, test_targets = load_data(dataset, ratio_normal=0.2, ratio_anomaly=0.0)
 
         train_ds = CustomDataset(samples, targets)
         test_ds = CustomDataset(test_samples, test_targets)
 
-        if True:
-            utils.plot(samples, targets, 'train_samples', dataset)
-            utils.plot(test_samples, test_targets, 'test_samples', dataset)
+        # if True:
+        #     utils.plot(samples, targets, 'train_samples', dataset)
+        #     utils.plot(test_samples, test_targets, 'test_samples', dataset)
 
     train_loader = DataLoader(dataset=train_ds, batch_size=64, shuffle=True, drop_last=True, pin_memory=True,
                               num_workers=1, persistent_workers=True)
