@@ -2,6 +2,7 @@ import os
 import sys
 import time
 
+import timm
 import torch
 
 import utils
@@ -26,7 +27,6 @@ def train_one_epoch(args, train_loader, model, criterion, optimizer, epoch):
         if torch.cuda.is_available():
             images = images.cuda(non_blocking=True)
             labels = labels.cuda(non_blocking=True)
-
 
         # feed forward and compute loss
         output = model(images)
@@ -98,12 +98,17 @@ def test(args, test_loader, model, criterion):
 
 
 def main(args):
+    # for model in timm.list_models():
+    #     if 'eff' in model:
+    #         print(model)
+    #     quit()
+
     # Split image dataset into folders
     utils.split_image_dataset()
 
     # Load dataset, and create dataloaders for training
     # train_loader, test_loader = utils.set_loader(args, augment_strategy='custom', plot_augments=False)
-    train_loader, test_loader = utils.load_data(args)
+    train_loader, test_loader = utils.load_data_with_pytorch_transforms(args, plot=False)
 
     # Load model and prepare for training
     model, criterion = utils.set_model(args, train_all_params=True)

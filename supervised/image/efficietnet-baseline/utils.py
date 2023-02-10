@@ -91,7 +91,7 @@ def get_warmup_scheduler(args, main_lr_scheduler, optimizer):
     return lr_scheduler
 
 
-def load_data_with_pytorch_transforms(args, traindir='split_dataset/train', valdir='split_dataset/test', plot=True):
+def load_data_with_pytorch_transforms(args, traindir='split_dataset/train', valdir='split_dataset/test', plot=False):
     print("Loading data")
     val_resize_size, val_crop_size, train_crop_size = (
         args.val_resize_size,
@@ -132,8 +132,6 @@ def load_data_with_pytorch_transforms(args, traindir='split_dataset/train', vald
     if plot:
         for i in range(len(dataset)):
             plot_tensor_img(dataset[i])
-
-    quit()
 
     collate_fn = None
     num_classes = len(dataset.classes)
